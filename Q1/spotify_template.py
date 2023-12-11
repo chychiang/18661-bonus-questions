@@ -6,7 +6,7 @@ import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import train_test_split
 from sklearn import metrics
-from sklearn.metrics import precision_score, recall_score, f1_score
+from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, ConfusionMatrixDisplay
 from sklearn.tree import export_graphviz
 import graphviz
 import matplotlib.pyplot as plt
@@ -21,8 +21,26 @@ def load_data():
             Training data dataframe, training labels, testing data dataframe,
             testing labels, features list
     """
-    # TODO: Finish this function
+    df = pd.read_csv('spotify_data.csv', index_col=0, header=0)
+    df = df.drop(['song_title', 'artist'], axis=1)
+    df_without_target = df.drop(['target'], axis=1)
+    labels = df['target']
+    corr_w_target = df.corr()['target'].sort_values(ascending=False)
+    print("="*80)
+    print("Feature Correlation with Target")
+    print(corr_w_target)
+    
+    plt.bar(corr_w_target.index, corr_w_target)
+    plt.xticks(rotation=45)
+    plt.title('Correlation with Target')
+    plt.ylabel('Correlation')
+    plt.xlabel('Features')
+    plt.tight_layout()
+    plt.savefig('corr_w_target.png')
+    plt.clf()
 
+    X_train, X_test, y_train, y_test = train_test_split(df_without_target, labels, test_size=0.2)
+    return X_train, X_test, y_train, y_test, df_without_target.columns.values.tolist()
 
 
 def cv_grid_search(training_table, training_labels):
@@ -34,7 +52,13 @@ def cv_grid_search(training_table, training_labels):
             Dictionary of best hyperparameters found by a grid search with
             cross-validation
     """
-    # TODO: Finish this function
+    tree = DecisionTreeClassifier()
+    params = {'criterion': ['gini', 'entropy', 'log_loss'],
+                'max_depth': [2, 4, 6, 8, 10],
+                'class_weight': ['balanced', None]}
+    gcv = GridSearchCV(estimator=tree, param_grid=params, cv=5)
+    res = gcv.fit(training_table, training_labels)
+    return res.best_params_
 
 
 def plot_confusion_matrix(test_labels, pred_labels):
@@ -44,9 +68,13 @@ def plot_confusion_matrix(test_labels, pred_labels):
         Returns:
             Writes image file of confusion matrix
     """
-    # TODO: Finish this function
-
-
+    cm = metrics.confusion_matrix(test_labels, pred_labels)
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=['hate', 'love'])
+    disp.plot()
+    plt.title('Confusion Matrix')
+    plt.tight_layout()
+    plt.savefig('confusion_matrix.png')
+    plt.clf()
 
 def graph_tree(model, training_features, class_names):
     """ Plot the tree of the trained model
@@ -55,7 +83,9 @@ def graph_tree(model, training_features, class_names):
         Returns:
             Writes PDF file showing decision tree representation
     """
-    # TODO: Finish this function
+    dot_data = export_graphviz(model, feature_names=training_features, class_names=class_names, out_file=None)
+    graph = graphviz.Source(dot_data)
+    graph.render('tree')
 
 
 def print_results(predictions, test_y):
@@ -65,7 +95,12 @@ def print_results(predictions, test_y):
         Returns:
             Prints precision, recall, F1-score, and accuracy
     """
-    # TODO: Finish this function
+    print("="*80)
+    print("Best Model Metrics")
+    print("Precision:", precision_score(test_y, predictions))
+    print("Recall:", recall_score(test_y, predictions))
+    print("Accuracy:", accuracy_score(test_y, predictions))
+    print("F1:", f1_score(test_y, predictions))
 
 
 def print_feature_importance(model, features):
@@ -76,32 +111,42 @@ def print_feature_importance(model, features):
             Prints ordered list of features, starting with most important,
             along with their relative importance (percentage).
     """
-    # TODO: Finish this function
+    print('='*80)
+    print("Feature Importance")
+    sort_index = np.argsort(model.feature_importances_)[::-1]
+    for i in sort_index:
+        print(features[i], model.feature_importances_[i])
 
 
 def main():
     """Run the program"""
     # Load data
-    (train_x, test_x, train_y, test_y), features = load_data()
+    train_x, test_x, train_y, test_y, features = load_data()
 
     # Cross Validation Training
     params = cv_grid_search(train_x, train_y)
-    # params = ['entropy', 4, 'balanced']
+    print("="*80)
+    print("Best parameters:")
+    for k, v in params.items():
+        print(k, v)
 
     # Train and test model using hyperparameters
-    # TODO: Finish this function
+    best_model = DecisionTreeClassifier()
+    best_model.fit(train_x, train_y)
+    predictions = best_model.predict(test_x)
 
     # Confusion Matrix
     plot_confusion_matrix(test_y, list(predictions))
 
     # Graph Tree
-    graph_tree(model, features, ['hate', 'love'])
+    graph_tree(best_model, features, ['hate', 'love'])
 
     # Accuracy, Precision, Recall, F1
     print_results(predictions, test_y)
 
     # Feature Importance
-    print_feature_importance(model, features)
+    print_feature_importance(best_model, features)
+    print("="*80)
 
 
 if __name__ == '__main__':
