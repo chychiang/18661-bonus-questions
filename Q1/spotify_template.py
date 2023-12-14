@@ -22,7 +22,13 @@ def load_data():
             testing labels, features list
     """
     df = pd.read_csv('spotify_data.csv', index_col=0, header=0)
+    print("="*80)
+    print("Dataframe Feature Names")
+    print(df.columns.values.tolist())
     df = df.drop(['song_title', 'artist'], axis=1)
+    print("="*80)
+    print("Dropped Dataframe Feature Names")
+    print(df.columns.values.tolist())
     df_without_target = df.drop(['target'], axis=1)
     labels = df['target']
     corr_w_target = df.corr()['target'].sort_values(ascending=False)
