@@ -5,6 +5,16 @@
     - [1.1 Import Data](#11-import-data)
       - [Import the data into a Pandas dataframe](#import-the-data-into-a-pandas-dataframe)
       - [Of the remaining features which you believe may be useful for classification, which feature(s) do you estimate will be the most important? Which feature(s) will be the least important?](#of-the-remaining-features-which-you-believe-may-be-useful-for-classification-which-features-do-you-estimate-will-be-the-most-important-which-features-will-be-the-least-important)
+      - [(c) Create a Pandas dataframe with just the useful features you have selected, and a separate data series for the targets (labels) of each sample. Code](#c-create-a-pandas-dataframe-with-just-the-useful-features-you-have-selected-and-a-separate-data-series-for-the-targets-labels-of-each-sample-code)
+      - [(d) Divide the full dataset into a training set and testing set, with 80% of the data used for training. Consider using the train\_test\_split function for this step. Code](#d-divide-the-full-dataset-into-a-training-set-and-testing-set-with-80-of-the-data-used-for-training-consider-using-the-train_test_split-function-for-this-step-code)
+    - [1.2 Training the Model](#12-training-the-model)
+      - [(a) Determine the best hyper-parameters for your decision tree using cross-validation with at least 5 folds. Search across at least 3 hyper-parameters for Decision Trees. It is recommended to look at ‘criterion’, ‘max\_depth’, and ‘class\_weight’, but you are welcome to explore additional or alternative hyper- parameters. The GridSearchCV module may be helpful here. Report which hyper-parameters you searched over and the best hyper-parameter values. Code Write-up](#a-determine-the-best-hyper-parameters-for-your-decision-tree-using-cross-validation-with-at-least-5-folds-search-across-at-least-3-hyper-parameters-for-decision-trees-it-is-recommended-to-look-at-criterion-max_depth-and-class_weight-but-you-are-welcome-to-explore-additional-or-alternative-hyper--parameters-the-gridsearchcv-module-may-be-helpful-here-report-which-hyper-parameters-you-searched-over-and-the-best-hyper-parameter-values-code-write-up)
+      - [Train your model with the best hyper-parameters found in Q1.2a. Run it on the test data to generate predictions for the test data. Your final accuracy may vary, but expect it to be around 70%. Code](#train-your-model-with-the-best-hyper-parameters-found-in-q12a-run-it-on-the-test-data-to-generate-predictions-for-the-test-data-your-final-accuracy-may-vary-but-expect-it-to-be-around-70-code)
+    - [Evaluating the Model](#evaluating-the-model)
+      - [Generate the precision, recall, accuracy, and F1-score for your predictions from Q1.2b. These metrics are all refinements of the classification accuracy. The sklearn.metrics modules may help with this. What are your results? Code Write-up](#generate-the-precision-recall-accuracy-and-f1-score-for-your-predictions-from-q12b-these-metrics-are-all-refinements-of-the-classification-accuracy-the-sklearnmetrics-modules-may-help-with-this-what-are-your-results-code-write-up)
+      - [Generate a confusion matrix to visualize your predictions (Figure 1 has an example; note that your matrix may have very different values). The sklearn.metrics module may also be useful here](#generate-a-confusion-matrix-to-visualize-your-predictions-figure-1-has-an-example-note-that-your-matrix-may-have-very-different-values-the-sklearnmetrics-module-may-also-be-useful-here)
+    - [Generate a representation of your decision tree from Q1.2b using the graphviz and export\_graphviz functions. Figure 2 shows an example decision tree output (note that your results may look very different from this example). Code Write-up](#generate-a-representation-of-your-decision-tree-from-q12b-using-the-graphviz-and-export_graphviz-functions-figure-2-shows-an-example-decision-tree-output-note-that-your-results-may-look-very-different-from-this-example-code-write-up)
+    - [Determine the relative importance of each feature for the tree you trained in Q1.2b. The importance of a feature is computed as the (normalized) total reduction of the criterion brought by that feature. How well do these results match your initial (qualitative) estimates of each feature’s importance in Q1.1a? Print the importance of each feature. Code Write-up](#determine-the-relative-importance-of-each-feature-for-the-tree-you-trained-in-q12b-the-importance-of-a-feature-is-computed-as-the-normalized-total-reduction-of-the-criterion-brought-by-that-feature-how-well-do-these-results-match-your-initial-qualitative-estimates-of-each-features-importance-in-q11a-print-the-importance-of-each-feature-code-write-up)
   - [Question 2: Learning to classify the “classy” digits](#question-2-learning-to-classify-the-classy-digits)
     - [(a) Explain the purpose of the __len__ and __getitem__ methods in the dataloader class. Write-up](#a-explain-the-purpose-of-the-len-and-getitem-methods-in-the-dataloader-class-write-up)
     - [(b) In the cell containing the class FMNIST(Dataset) complete the methods provided, ensuring that the images are scaled to `[0,1]`. Please ensure that you use the hyperparameters from the cfg dictionary](#b-in-the-cell-containing-the-class-fmnistdataset-complete-the-methods-provided-ensuring-that-the-images-are-scaled-to-01-please-ensure-that-you-use-the-hyperparameters-from-the-cfg-dictionary)
@@ -12,9 +22,6 @@
       - [2.1.3.a Define the architecture in the class Network](#213a-define-the-architecture-in-the-class-network)
       - [2.1.3.b Write code for saving and loading the model in the load and save methods of Network, which can be used to stop the training in an intermediate epoch and load it later to resume training](#213b-write-code-for-saving-and-loading-the-model-in-the-load-and-save-methods-of-network-which-can-be-used-to-stop-the-training-in-an-intermediate-epoch-and-load-it-later-to-resume-training)
     - [2.1.4 A holistic view of the training](#214-a-holistic-view-of-the-training)
-      - [Training Loss](#training-loss)
-      - [Test Accuracy](#test-accuracy)
-      - [Current learning rate](#current-learning-rate)
     - [2.1.5 Training the model](#215-training-the-model)
       - [Learning Rate Scheduling - Use the ReduceLROnPlateau scheduler to anneal the learning rate based on the test set accuracy](#learning-rate-scheduling---use-the-reducelronplateau-scheduler-to-anneal-the-learning-rate-based-on-the-test-set-accuracy)
       - [(f) Finally, train the model using the hyper-parameters in the cfg dictionary](#f-finally-train-the-model-using-the-hyper-parameters-in-the-cfg-dictionary)
@@ -22,6 +29,14 @@
       - [(a) Initialize the weights of your Multi-Layered Perceptron in the init\_weights function using the fol- lowing strategies](#a-initialize-the-weights-of-your-multi-layered-perceptron-in-the-init_weights-function-using-the-fol--lowing-strategies)
       - [(b) Data Augmentation has been a very useful technique for effective training of Deep Learning models. Give two examples of how data augmentation can be useful (In any task of your choice). Write-up](#b-data-augmentation-has-been-a-very-useful-technique-for-effective-training-of-deep-learning-models-give-two-examples-of-how-data-augmentation-can-be-useful-in-any-task-of-your-choice-write-up)
       - [(h) 2.2 (c) Tensorboard screenshot, final train loss and final test accuracy of VC + XNW + Data Augmentation (DA)](#h-22-c-tensorboard-screenshot-final-train-loss-and-final-test-accuracy-of-vc--xnw--data-augmentation-da)
+  - [Implement Reinforcement Learning Algorithms](#implement-reinforcement-learning-algorithms)
+    - [Value Iteration](#value-iteration)
+      - [4x4](#4x4)
+      - [8x8](#8x8)
+    - [SARSA](#sarsa)
+      - [4x4](#4x4-1)
+      - [8x8](#8x8-1)
+      - [Compare with the policy from value iteration, are the the same? Provide some analysis or hypothesis.](#compare-with-the-policy-from-value-iteration-are-the-the-same-provide-some-analysis-or-hypothesis)
 
 ## Question 1: Decision Tree for Spotify Data
 
@@ -87,6 +102,238 @@ Dropped Dataframe Feature Names
 #### Of the remaining features which you believe may be useful for classification, which feature(s) do you estimate will be the most important? Which feature(s) will be the least important?
 
 Briefly explain your answers.
+
+To find the most important features, we can use the `corr()` function to find the correlation between each feature and the target. The higher the correlation, the more important the feature is.
+
+```python
+corr_w_target = df.corr()['target'].sort_values(ascending=False)
+print("="*80)
+print("Feature Correlation with Target")
+print(corr_w_target)
+```
+
+The following is the result:
+
+```text
+Feature Correlation with Target
+target              1.000000
+danceability        0.176706
+speechiness         0.154006
+instrumentalness    0.152594
+duration_ms         0.146749
+valence             0.107930
+time_signature      0.040182
+energy              0.039688
+tempo               0.034732
+key                 0.033594
+liveness            0.026364
+loudness           -0.072000
+mode               -0.072336
+acousticness       -0.129627
+Name: target, dtype: float64
+```
+
+![](Q1/corr_w_target.png)
+
+With this result, I estimate that the most important features are:
+
+1. danceability
+2. speechiness
+3. instrumentalness
+4. etc
+
+#### (c) Create a Pandas dataframe with just the useful features you have selected, and a separate data series for the targets (labels) of each sample. Code
+
+```python
+df = df.drop(['song_title', 'artist'], axis=1)
+print("="*80)
+print("Dropped Dataframe Feature Names")
+print(df.columns.values.tolist())
+df_without_target = df.drop(['target'], axis=1)
+labels = df['target']
+```
+
+#### (d) Divide the full dataset into a training set and testing set, with 80% of the data used for training. Consider using the train_test_split function for this step. Code
+
+```python
+X_train, X_test, y_train, y_test = train_test_split(df_without_target, labels, test_size=0.2)
+```
+
+### 1.2 Training the Model
+
+#### (a) Determine the best hyper-parameters for your decision tree using cross-validation with at least 5 folds. Search across at least 3 hyper-parameters for Decision Trees. It is recommended to look at ‘criterion’, ‘max_depth’, and ‘class_weight’, but you are welcome to explore additional or alternative hyper- parameters. The GridSearchCV module may be helpful here. Report which hyper-parameters you searched over and the best hyper-parameter values. Code Write-up
+
+```python
+def cv_grid_search(training_table, training_labels):
+    """ Run grid search with cross-validation to try different
+    hyperparameters
+        Arguments:
+            Training data dataframe and training labels
+        Returns:
+            Dictionary of best hyperparameters found by a grid search with
+            cross-validation
+    """
+    tree = DecisionTreeClassifier()
+    params = {'criterion': ['gini', 'entropy', 'log_loss'],
+                'max_depth': [2, 4, 6, 8, 10],
+                'class_weight': ['balanced', None]}
+    gcv = GridSearchCV(estimator=tree, param_grid=params, cv=5)
+    res = gcv.fit(training_table, training_labels)
+    return res.best_params_
+```
+
+I searched over the following hyperparameters:
+
+- criterion: ['gini', 'entropy', 'log_loss']
+- max_depth: [2, 4, 6, 8, 10]
+- class_weight: ['balanced', None]
+
+and the best hyperparameters are:
+
+```text
+Best parameters:
+class_weight balanced
+criterion gini
+max_depth 4
+```
+
+#### Train your model with the best hyper-parameters found in Q1.2a. Run it on the test data to generate predictions for the test data. Your final accuracy may vary, but expect it to be around 70%. Code
+
+```python
+params = cv_grid_search(train_x, train_y)
+print("="*80)
+print("Best parameters:")
+for k, v in params.items():
+    print(k, v)
+
+# Train and test model using hyperparameters
+best_model = DecisionTreeClassifier()
+best_model.fit(train_x, train_y)
+predictions = best_model.predict(test_x)
+```
+
+The following is the result:
+
+```text
+Best Model Metrics
+Precision: 0.7754010695187166
+Recall: 0.7107843137254902
+Accuracy: 0.75
+F1: 0.7416879795396418
+```
+
+### Evaluating the Model
+
+#### Generate the precision, recall, accuracy, and F1-score for your predictions from Q1.2b. These metrics are all refinements of the classification accuracy. The sklearn.metrics modules may help with this. What are your results? Code Write-up
+
+```python
+def print_results(predictions, test_y):
+    """Print results
+        Arguments:
+            Ground truth labels and predicted labels
+        Returns:
+            Prints precision, recall, F1-score, and accuracy
+    """
+    print("="*80)
+    print("Best Model Metrics")
+    print("Precision:", precision_score(test_y, predictions))
+    print("Recall:", recall_score(test_y, predictions))
+    print("Accuracy:", accuracy_score(test_y, predictions))
+    print("F1:", f1_score(test_y, predictions))
+```
+
+See above for the results.
+
+My results show that the model has a precision of `0.7754010695187166`, a recall of `0.7107843137254902`, an accuracy of `0.75`, and an F1-score of `0.7416879795396418`.
+
+#### Generate a confusion matrix to visualize your predictions (Figure 1 has an example; note that your matrix may have very different values). The sklearn.metrics module may also be useful here
+
+```python
+def plot_confusion_matrix(test_labels, pred_labels):
+    """Plot confusion matrix
+        Arguments:
+            ground truth labels and predicted labels
+        Returns:
+            Writes image file of confusion matrix
+    """
+    cm = metrics.confusion_matrix(test_labels, pred_labels)
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=['hate', 'love'])
+    disp.plot()
+    plt.title('Confusion Matrix')
+    plt.tight_layout()
+    plt.savefig('confusion_matrix.png')
+    plt.clf()
+```
+
+![](Q1/confusion_matrix.png)
+
+### Generate a representation of your decision tree from Q1.2b using the graphviz and export_graphviz functions. Figure 2 shows an example decision tree output (note that your results may look very different from this example). Code Write-up
+
+![](Q1/tree_pic.png)
+
+```python
+def graph_tree(model, training_features, class_names):
+    """ Plot the tree of the trained model
+        Arguments:
+            Trained model, list of features, class names
+        Returns:
+            Writes PDF file showing decision tree representation
+    """
+    dot_data = export_graphviz(model, feature_names=training_features, class_names=class_names, out_file=None)
+    graph = graphviz.Source(dot_data)
+    graph.render('tree')
+```
+
+### Determine the relative importance of each feature for the tree you trained in Q1.2b. The importance of a feature is computed as the (normalized) total reduction of the criterion brought by that feature. How well do these results match your initial (qualitative) estimates of each feature’s importance in Q1.1a? Print the importance of each feature. Code Write-up
+
+Hint: This quantity is computed as you train your model, and thus should not require additional computations on your part.
+
+```python
+def print_feature_importance(model, features):
+    """Print feature importance
+        Arguments:
+            Trained model and list of features
+        Returns:
+            Prints ordered list of features, starting with most important,
+            along with their relative importance (percentage).
+    """
+    print('='*80)
+    print("Feature Importance")
+    sort_index = np.argsort(model.feature_importances_)[::-1]
+    for i in sort_index:
+        print(features[i], model.feature_importances_[i])
+```
+
+Result
+
+```text
+Feature Importance
+energy 0.13003463773575274
+duration_ms 0.11546834416598821
+instrumentalness 0.11541294333025749
+speechiness 0.11137481367241502
+loudness 0.10356396785326025
+danceability 0.1000485352109381
+acousticness 0.08117668690575906
+tempo 0.0777709099698381
+valence 0.07456193730306215
+liveness 0.05302169386599422
+key 0.030613572781728972
+mode 0.00695195720500572
+time_signature 0.0
+```
+
+The result does not entirely match my initial estimates of each feature's importance in Q1.1a. I thought that the most important features would be:
+
+1. danceability
+2. speechiness
+3. instrumentalness
+
+Instead, the most important features are:
+
+1. energy
+2. duration_ms
+3. instrumentalness
 
 ## Question 2: Learning to classify the “classy” digits
 
@@ -259,17 +506,11 @@ class Network(nn.Module):
 
 ### 2.1.4 A holistic view of the training
 
-#### Training Loss
+![](holistic_training.png)
 
-![Training Loss](./trainloss1.png)
-
-#### Test Accuracy
-
-![Test Accuracy](./testacc1.png)
-
-#### Current learning rate
-
-![Current learning rate](./lr1.png)
+The final test accuracy is `0.7638`.
+The final train loss is `0.2583`.
+The current learning rate at the last epoch is `0.005`
 
 ### 2.1.5 Training the model
 
@@ -488,12 +729,226 @@ Explain any change in perfomance.
 
 ![](vc_aug_xavier.png)
 
-The final train loss is `0.3224` and the final test accuracy is `0.7625`.
+The final train loss is `0.1453` and the final test accuracy is `0.7996`.
 
-The performance of the model trained with augmented data is improved compared to the model trained without augmented data. This is because the augmented data helps the model to be more robust to different orientations of the image. Thus, the model is able to generalize better to the test set.
+The performance of the model trained with augmented data  improved significantly compared to the model trained without augmented data. This is because the augmented data helps the model to be more robust to different orientations of the image. Thus, the model is able to generalize better to the test set. The training loss is also lower, which means that the model is able to learn better.
 
 ![](vc_aug_drop_xavier.png)
 
-The final train loss is `0.2942` and the final test accuracy is `0.7589`.
+The final train loss is `0.3306` and the final test accuracy is `0.8365`.
 
-The performance of this model with drop out improved in terms of train loss, but the test accuracy is slightly worse than the model without drop out. This may be due to the fact that drop out strategy prevent overfitting, but also reduces the model capacity. Thus, the model is not able to learn as well as the model without drop out.
+The performance of this model with drop out improved significantly in terms of accuracy, but the training loss is slightly worse than the similarly model above without drop out. This may be due to the fact that drop out strategy prevent overfitting, which is good for generalizability, but also reduces the model's ability to fit perfectly to the data.
+
+## Implement Reinforcement Learning Algorithms
+
+### Value Iteration
+
+#### 4x4
+
+Final computed values:
+
+```text
+================Running value iteration=====================
+Optimal value function: 
+[0.46089055 0.56655611 0.673289   0.56655611 0.56655611 0.
+ 0.7811     0.         0.673289   0.7811     0.89       0.
+ 0.         0.89       1.         0.        ]
+Optimal policy: 
+[[0. 1. 0. 0.]
+ [0. 0. 1. 0.]
+ [0. 1. 0. 0.]
+ [1. 0. 0. 0.]
+ [0. 1. 0. 0.]
+ [1. 0. 0. 0.]
+ [0. 1. 0. 0.]
+ [1. 0. 0. 0.]
+ [0. 0. 1. 0.]
+ [0. 1. 0. 0.]
+ [0. 1. 0. 0.]
+ [1. 0. 0. 0.]
+ [1. 0. 0. 0.]
+ [0. 0. 1. 0.]
+ [0. 0. 1. 0.]
+ [1. 0. 0. 0.]]
+```
+
+#### 8x8
+
+```text
+================Running value iteration=====================
+Optimal value function: 
+[-0.34726875 -0.24976641 -0.1512792  -0.05179717  0.04868972  0.15019164
+  0.25271883  0.35628164 -0.24976641 -0.1512792  -0.05179717  0.04868972
+  0.15019164  0.25271883  0.35628164  0.46089055 -0.1512792  -0.05179717
+  0.04868972  0.          0.25271883  0.35628164  0.46089055  0.56655611
+ -0.05179717  0.04868972  0.15019164  0.25271883  0.35628164  0.
+  0.56655611  0.673289   -0.1512792  -0.05179717  0.04868972  0.
+  0.46089055  0.56655611  0.673289    0.7811     -0.24976641  0.
+  0.          0.46089055  0.56655611  0.673289    0.          0.89
+ -0.1512792   0.          0.25271883  0.35628164  0.          0.7811
+  0.          1.         -0.05179717  0.04868972  0.15019164  0.
+  0.7811      0.89        1.          0.        ]
+Optimal policy: 
+[[0. 1. 0. 0.]
+ [0. 1. 0. 0.]
+ [0. 1. 0. 0.]
+ [0. 1. 0. 0.]
+ [0. 1. 0. 0.]
+ [0. 1. 0. 0.]
+ [0. 1. 0. 0.]
+ [0. 1. 0. 0.]
+ [0. 1. 0. 0.]
+ [0. 1. 0. 0.]
+ [0. 1. 0. 0.]
+ [0. 0. 1. 0.]
+ [0. 1. 0. 0.]
+ [0. 1. 0. 0.]
+ [0. 1. 0. 0.]
+ [0. 1. 0. 0.]
+ [0. 1. 0. 0.]
+ [0. 1. 0. 0.]
+ [0. 1. 0. 0.]
+ [1. 0. 0. 0.]
+ [0. 1. 0. 0.]
+ [0. 0. 1. 0.]
+ [0. 1. 0. 0.]
+ [0. 1. 0. 0.]
+ [0. 0. 1. 0.]
+ [0. 0. 1. 0.]
+ [0. 0. 1. 0.]
+ [0. 0. 1. 0.]
+ [0. 1. 0. 0.]
+ [1. 0. 0. 0.]
+ [0. 1. 0. 0.]
+ [0. 1. 0. 0.]
+ [0. 0. 1. 0.]
+ [0. 0. 1. 0.]
+ [0. 0. 0. 1.]
+ [1. 0. 0. 0.]
+ [0. 1. 0. 0.]
+ [0. 1. 0. 0.]
+ [0. 0. 1. 0.]
+ [0. 1. 0. 0.]
+ [0. 1. 0. 0.]
+ [1. 0. 0. 0.]
+ [1. 0. 0. 0.]
+ [0. 0. 1. 0.]
+ [0. 0. 1. 0.]
+ [0. 1. 0. 0.]
+ [1. 0. 0. 0.]
+ [0. 1. 0. 0.]
+ [0. 1. 0. 0.]
+ [1. 0. 0. 0.]
+ [0. 0. 1. 0.]
+ [0. 0. 0. 1.]
+ [1. 0. 0. 0.]
+ [0. 1. 0. 0.]
+ [1. 0. 0. 0.]
+ [0. 1. 0. 0.]
+ [0. 0. 1. 0.]
+ [0. 0. 1. 0.]
+ [0. 0. 0. 1.]
+ [1. 0. 0. 0.]
+ [0. 0. 1. 0.]
+ [0. 0. 1. 0.]
+ [0. 0. 1. 0.]
+ [1. 0. 0. 0.]]
+```
+
+### SARSA
+
+#### 4x4
+
+```text
+Policy from SARSA
+[[0. 0. 1. 0.]
+ [0. 0. 1. 0.]
+ [0. 1. 0. 0.]
+ [1. 0. 0. 0.]
+ [0. 1. 0. 0.]
+ [1. 0. 0. 0.]
+ [0. 1. 0. 0.]
+ [1. 0. 0. 0.]
+ [0. 0. 1. 0.]
+ [0. 0. 1. 0.]
+ [0. 1. 0. 0.]
+ [1. 0. 0. 0.]
+ [1. 0. 0. 0.]
+ [0. 0. 1. 0.]
+ [0. 0. 1. 0.]
+ [1. 0. 0. 0.]]
+```
+
+#### 8x8
+
+```text
+Policy from SARSA
+[[0. 0. 1. 0.]
+ [0. 0. 1. 0.]
+ [0. 0. 1. 0.]
+ [0. 1. 0. 0.]
+ [0. 0. 1. 0.]
+ [0. 1. 0. 0.]
+ [0. 1. 0. 0.]
+ [0. 1. 0. 0.]
+ [0. 0. 1. 0.]
+ [0. 0. 1. 0.]
+ [0. 0. 1. 0.]
+ [0. 0. 1. 0.]
+ [0. 0. 1. 0.]
+ [0. 0. 1. 0.]
+ [0. 1. 0. 0.]
+ [0. 1. 0. 0.]
+ [0. 1. 0. 0.]
+ [0. 0. 1. 0.]
+ [0. 1. 0. 0.]
+ [1. 0. 0. 0.]
+ [0. 0. 1. 0.]
+ [0. 0. 1. 0.]
+ [0. 0. 1. 0.]
+ [0. 1. 0. 0.]
+ [0. 0. 1. 0.]
+ [0. 0. 1. 0.]
+ [0. 0. 1. 0.]
+ [0. 0. 1. 0.]
+ [0. 1. 0. 0.]
+ [1. 0. 0. 0.]
+ [0. 0. 1. 0.]
+ [0. 1. 0. 0.]
+ [1. 0. 0. 0.]
+ [0. 0. 0. 1.]
+ [1. 0. 0. 0.]
+ [1. 0. 0. 0.]
+ [0. 0. 1. 0.]
+ [0. 0. 1. 0.]
+ [0. 0. 1. 0.]
+ [0. 1. 0. 0.]
+ [0. 1. 0. 0.]
+ [1. 0. 0. 0.]
+ [1. 0. 0. 0.]
+ [0. 1. 0. 0.]
+ [0. 0. 0. 1.]
+ [0. 0. 0. 1.]
+ [1. 0. 0. 0.]
+ [0. 1. 0. 0.]
+ [0. 1. 0. 0.]
+ [1. 0. 0. 0.]
+ [0. 1. 0. 0.]
+ [1. 0. 0. 0.]
+ [1. 0. 0. 0.]
+ [0. 1. 0. 0.]
+ [1. 0. 0. 0.]
+ [0. 1. 0. 0.]
+ [1. 0. 0. 0.]
+ [0. 0. 1. 0.]
+ [0. 0. 0. 1.]
+ [1. 0. 0. 0.]
+ [0. 0. 1. 0.]
+ [0. 0. 1. 0.]
+ [0. 0. 1. 0.]
+ [1. 0. 0. 0.]]
+ ```
+
+#### Compare with the policy from value iteration, are the the same? Provide some analysis or hypothesis.
+
+The policies are slighly different when comparing SARSA and value iteration. This difference is likely due to SARSA following an on-policy approach, updating its learning based on the agent's own actions, leading to a strategy influenced by its exploration and exploitation choices during learning while value iteration uses an off-policy approach. It directly calculates an optimal strategies without adhering to a specific policy during the learning process. The resulting strategy from value iteration aims for optimality based on the best-calculated values, independent of the exploration and exploitation choices made during learning in SARSA.
